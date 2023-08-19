@@ -1,3 +1,6 @@
+import { CollisionDetector } from "./collisionDetector.js";
+import { Enemy } from "./enemy.js";
+import { CollisionSide } from "./enums/collisionSite.js";
 import { Floor } from "./floor.js";
 import { Player } from "./player.js";
 
@@ -10,6 +13,7 @@ export default class Game {
   previousTime: number;
   score: number;
   static instance?: Game;
+  collisionDetector: CollisionDetector;
 
   constructor() {
     this.canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -23,12 +27,15 @@ export default class Game {
     this.gameObjects = [];
     this.previousTime = Date.now();
 
+    this.collisionDetector = new CollisionDetector();
+
     this.score = 0;
   }
 
   setup(): void {
     this.gameObjects.push(new Player(10, 450));
     this.gameObjects.push(new Floor());
+    this.gameObjects.push(new Enemy(400, 440));
   }
 
   gameLoop(): void {
@@ -47,6 +54,27 @@ export default class Game {
   update(deltaTime: number): void {
     for (const object of this.gameObjects) {
       object.update(deltaTime);
+    }
+
+    const player = this.gameObjects.find((obj) => obj instanceof Player);
+    const enemies = this.gameObjects.filter((obj) => obj instanceof Enemy);
+
+    for (const enemy of enemies) {
+      const collisionValue = this.collisionDetector.checkCollision(
+        player,
+        enemy
+      );
+      if (collisionValue !== CollisionSide.NONE) {
+        console.log("Collision! : " + collisionValue);
+        if (collisionValue === CollisionSide.ABOVE) {
+          this.score += 1;
+          // Remove the enemy from gameObjects
+          const enemyIndex = this.gameObjects.indexOf(enemy);
+          if (enemyIndex > -1) {
+            this.gameObjects.splice(enemyIndex, 1);
+          }
+        }
+      }
     }
   }
 

@@ -1,12 +1,9 @@
-import { InputManager } from "./inputManager.js";
-
-export class Player {
+export class Enemy {
   gravityAccelY: number;
   dragCoeffX: number;
   dragCoeffY: number;
   frictionCoeffX: number;
   movementForceX: number;
-  jumpImpulse: number;
 
   pos: { x: number; y: number };
   dim: { x: number; y: number };
@@ -21,7 +18,6 @@ export class Player {
 
     this.frictionCoeffX = 0.05;
     this.movementForceX = 20000;
-    this.jumpImpulse = 1500;
 
     this.pos = {
       x: posX,
@@ -29,8 +25,8 @@ export class Player {
     };
 
     this.dim = {
-      x: 20,
-      y: 20,
+      x: 30,
+      y: 30,
     };
 
     this.v = {
@@ -46,20 +42,11 @@ export class Player {
 
   update(deltaTime: number): void {
     let forceX = 0;
-    let forceY = this.gravityAccelY;
+    let forceY = 0;
 
-    this.keepPlayerAboveGround();
+    forceX -= this.movementForceX;
 
-    const input = InputManager.getInstance();
-    if (input.getKey("KeyA")) {
-      forceX -= this.movementForceX;
-    } else if (input.getKey("KeyD")) {
-      forceX += this.movementForceX;
-    }
-
-    if (this.pos.y >= 442 && input.getKey("Space")) {
-      this.v.y -= this.jumpImpulse;
-    }
+    forceX += this.movementForceX;
 
     forceX += -Math.sign(this.v.x) * this.dragCoeffX * this.v.x ** 2;
     forceY += -Math.sign(this.v.y) * this.dragCoeffY * this.v.y ** 2;
@@ -77,13 +64,7 @@ export class Player {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = "red";
+    ctx.fillStyle = "yellow";
     ctx.fillRect(this.pos.x, this.pos.y, this.dim.x, this.dim.y);
-  }
-
-  keepPlayerAboveGround(): void {
-    if (this.pos.y >= 442) {
-      this.pos.y = 442;
-    }
   }
 }
