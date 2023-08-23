@@ -1,8 +1,10 @@
 import { Camera } from "./camera.js";
 import { CollisionDetector } from "./collisionDetector.js";
 import { Enemy } from "./enemy.js";
+import { EnemyManager } from "./enemyManager.js";
 import { CollisionSide } from "./enums/collisionSite.js";
 import { Floor } from "./floor.js";
+import { GameConstants } from "./gameConstants.js";
 import { Player } from "./player.js";
 
 export default class Game {
@@ -16,11 +18,12 @@ export default class Game {
   static instance?: Game;
   collisionDetector: CollisionDetector;
   camera: Camera;
+  enemyManager: EnemyManager;
 
   constructor() {
     this.canvas = document.querySelector("canvas") as HTMLCanvasElement;
-    this.canvas.width = 700;
-    this.canvas.height = 500;
+    this.canvas.width = GameConstants.GAME_WIDTH;
+    this.canvas.height = GameConstants.GAME_HEIGHT;
 
     this.screenW = this.canvas.width;
     this.screenH = this.canvas.height;
@@ -30,15 +33,15 @@ export default class Game {
     this.previousTime = Date.now();
 
     this.collisionDetector = new CollisionDetector();
-
+    this.enemyManager = new EnemyManager();
     this.camera = new Camera();
     this.score = 0;
   }
 
   setup(): void {
-    this.gameObjects.push(new Player(10, 450));
+    this.gameObjects.push(new Player());
     this.gameObjects.push(new Floor());
-    this.gameObjects.push(new Enemy(400, 440));
+    this.enemyManager.spawnEnemies(this.gameObjects);
   }
 
   gameLoop(): void {
@@ -64,7 +67,7 @@ export default class Game {
       object.update(deltaTime, this.camera);
     }
 
-    
+
     for (const enemy of enemies) {
       const collisionValue = this.collisionDetector.checkCollision(
         player,
@@ -86,13 +89,17 @@ export default class Game {
 
   draw(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.font = "24px Arial";
-    this.ctx.fillText("Score: " + this.score, 50, 50);
+    this.drawScore();
 
     for (const object of this.gameObjects) {
       this.ctx.save();
       object.draw(this.ctx, this.camera);
       this.ctx.restore();
     }
+  }
+
+  private drawScore(): void {
+    this.ctx.font = "24px Arial";
+    this.ctx.fillText("Score: " + this.score, 50, 50);
   }
 }
