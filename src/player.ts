@@ -1,3 +1,4 @@
+import { Camera } from "./camera.js";
 import { InputManager } from "./inputManager.js";
 
 export class Player {
@@ -76,10 +77,12 @@ export class Player {
     this.pos.y += this.v.y * deltaTime;
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, camera: Camera): void {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.pos.x, this.pos.y, this.dim.x, this.dim.y);
+
+    ctx.fillRect(this.pos.x - camera.pos.x, this.pos.y - camera.pos.y, this.dim.x, this.dim.y);
   }
+
 
   keepPlayerAboveGround(): void {
     if (this.pos.y >= 442) {

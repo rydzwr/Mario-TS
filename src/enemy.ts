@@ -1,3 +1,5 @@
+import { Camera } from "./camera.js";
+
 export class Enemy {
   gravityAccelY: number;
   dragCoeffX: number;
@@ -63,8 +65,9 @@ export class Enemy {
     this.pos.y += this.v.y * deltaTime;
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, camera: Camera): void {
     ctx.fillStyle = "yellow";
-    ctx.fillRect(this.pos.x, this.pos.y, this.dim.x, this.dim.y);
-  }
+    ctx.fillRect(this.pos.x - camera.pos.x, this.pos.y - camera.pos.y, this.dim.x, this.dim.y);
+}
+
 }

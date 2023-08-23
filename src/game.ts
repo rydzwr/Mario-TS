@@ -1,3 +1,4 @@
+import { Camera } from "./camera.js";
 import { CollisionDetector } from "./collisionDetector.js";
 import { Enemy } from "./enemy.js";
 import { CollisionSide } from "./enums/collisionSite.js";
@@ -14,6 +15,7 @@ export default class Game {
   score: number;
   static instance?: Game;
   collisionDetector: CollisionDetector;
+  camera: Camera;
 
   constructor() {
     this.canvas = document.querySelector("canvas") as HTMLCanvasElement;
@@ -29,6 +31,7 @@ export default class Game {
 
     this.collisionDetector = new CollisionDetector();
 
+    this.camera = new Camera();
     this.score = 0;
   }
 
@@ -52,13 +55,16 @@ export default class Game {
   }
 
   update(deltaTime: number): void {
-    for (const object of this.gameObjects) {
-      object.update(deltaTime);
-    }
-
     const player = this.gameObjects.find((obj) => obj instanceof Player);
     const enemies = this.gameObjects.filter((obj) => obj instanceof Enemy);
 
+    this.camera.update(player, this.screenW);
+
+    for (const object of this.gameObjects) {
+      object.update(deltaTime, this.camera);
+    }
+
+    
     for (const enemy of enemies) {
       const collisionValue = this.collisionDetector.checkCollision(
         player,
@@ -85,25 +91,8 @@ export default class Game {
 
     for (const object of this.gameObjects) {
       this.ctx.save();
-      object.draw(this.ctx);
+      object.draw(this.ctx, this.camera);
       this.ctx.restore();
     }
-  }
-
-  static getInstance(): Game {
-    if (Game.instance === undefined) {
-      Game.instance = new Game();
-    }
-    return Game.instance;
-  }
-
-  static toScreen(worldVector: { x: number; y: number }): {
-    x: number;
-    y: number;
-  } {
-    return {
-      x: worldVector.x * Game.instance!.screenW,
-      y: -worldVector.y * Game.instance!.screenW,
-    };
   }
 }
