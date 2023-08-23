@@ -3,12 +3,18 @@ export class GameConstants {
     public static GAME_WIDTH = 1200;
     public static GAME_HEIGHT = 800;
 
+    // CAMERA
+    public static CAMERA_OFFSET_X = 400;
+    public static CAMERA_OFFSET_Y = 50;
+
     // FLOOR
     public static FLOOR_COLOR = 'green';
     public static FLOOR_HEIGHT = 30;
     public static FLOOR_POSITION_Y = this.GAME_HEIGHT - this.FLOOR_HEIGHT;
 
     // PLAYER
+    public static PLAYER_GETTING_DAMAGE_TIME = 1200;
+    public static PLAYER_LIVES = 3;
     public static PLAYER_COLOR = 'royalblue';
     public static PLAYER_HEIGHT = 20;
     public static PLAYER_WIDTH = 20;

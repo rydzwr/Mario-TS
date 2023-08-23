@@ -1,4 +1,5 @@
-import { Player } from "./player";
+import { GameConstants } from "./gameConstants.js";
+import { Player } from "./player.js";
 
 export class Camera {
     pos: { x: number; y: number };
@@ -11,8 +12,8 @@ export class Camera {
             y: 0,
         };
         
-        this.marginX = 200;
-        this.marginY = 50;
+        this.marginX = GameConstants.CAMERA_OFFSET_X;
+        this.marginY = GameConstants.CAMERA_OFFSET_Y;
     }
 
     update(player: Player, screenW: number): void {

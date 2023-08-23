@@ -8,33 +8,31 @@ import { GameConstants } from "./gameConstants.js";
 import { Player } from "./player.js";
 
 export default class Game {
+  collisionDetector: CollisionDetector;
+  ctx: CanvasRenderingContext2D;
+  enemyManager: EnemyManager;
   canvas: HTMLCanvasElement;
+  previousTime: number;
+  playerLives: number;
+  gameObjects: any[];
   screenW: number;
   screenH: number;
-  ctx: CanvasRenderingContext2D;
-  gameObjects: any[];
-  previousTime: number;
-  score: number;
-  static instance?: Game;
-  collisionDetector: CollisionDetector;
   camera: Camera;
-  enemyManager: EnemyManager;
+  score: number;
 
   constructor() {
     this.canvas = document.querySelector("canvas") as HTMLCanvasElement;
-    this.canvas.width = GameConstants.GAME_WIDTH;
-    this.canvas.height = GameConstants.GAME_HEIGHT;
-
-    this.screenW = this.canvas.width;
-    this.screenH = this.canvas.height;
-
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.gameObjects = [];
-    this.previousTime = Date.now();
-
     this.collisionDetector = new CollisionDetector();
+    this.canvas.height = GameConstants.GAME_HEIGHT;
+    this.playerLives = GameConstants.PLAYER_LIVES;
+    this.canvas.width = GameConstants.GAME_WIDTH;
     this.enemyManager = new EnemyManager();
+    this.screenH = this.canvas.height;
+    this.screenW = this.canvas.width;
+    this.previousTime = Date.now();
     this.camera = new Camera();
+    this.gameObjects = [];
     this.score = 0;
   }
 
@@ -67,29 +65,20 @@ export default class Game {
       object.update(deltaTime, this.camera);
     }
 
-
     for (const enemy of enemies) {
       const collisionValue = this.collisionDetector.checkCollision(
         player,
         enemy
       );
       if (collisionValue !== CollisionSide.NONE) {
-        console.log("Collision! : " + collisionValue);
-        if (collisionValue === CollisionSide.ABOVE) {
-          this.score += 1;
-          // Remove the enemy from gameObjects
-          const enemyIndex = this.gameObjects.indexOf(enemy);
-          if (enemyIndex > -1) {
-            this.gameObjects.splice(enemyIndex, 1);
-          }
-        }
+        this.processCollision(collisionValue, enemy, player);
       }
     }
   }
 
   draw(): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawScore();
+    this.drawGameStats();
 
     for (const object of this.gameObjects) {
       this.ctx.save();
@@ -98,8 +87,31 @@ export default class Game {
     }
   }
 
-  private drawScore(): void {
+  private drawGameStats(): void {
     this.ctx.font = "24px Arial";
     this.ctx.fillText("Score: " + this.score, 50, 50);
+    this.ctx.fillText("Lives: " + this.playerLives, 50, 90);
+  }
+
+  private processCollision(collision: CollisionSide, enemy: Enemy, player: Player): void {
+    if (collision === CollisionSide.ABOVE) {
+      this.score += 1;
+      // Remove the enemy from gameObjects
+      const enemyIndex = this.gameObjects.indexOf(enemy);
+      if (enemyIndex > -1) {
+        this.gameObjects.splice(enemyIndex, 1);
+      }
+    }
+
+    else if (collision === CollisionSide.LEFT) {
+      this.playerLives--;
+      player.pos.x -= 80;
+      player.setGettingDamage(true);
+    }
+    else if (collision === CollisionSide.RIGHT) {
+      this.playerLives--;
+      player.pos.x += 80;
+      player.setGettingDamage(true);
+    }
   }
 }
